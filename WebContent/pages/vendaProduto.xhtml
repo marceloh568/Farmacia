@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<f:event listener="#{vendaProdutoBean.carregarListagem()}"
+			type="preRenderView" />
+
+
+		<h:form id="frmVendaListagem">
+			<p:dataTable id="tblVendaListagem" widgetVar="tabelaVendaListagem"
+				value="#{vendaProdutoBean.itens}" var="item"
+				emptyMessage="Nenhum registro encontrado." paginator="true"
+				rows="10" filteredValue="#{vendaProdutoBean.itensFiltrados}">
+
+				<f:facet name="header">
+					<h:outputText value="Listagem de Vendas" />
+				</f:facet>
+
+				<p:column headerText="ID" filterBy="#{item.id}" sortBy="#{item.id}">
+					<h:outputText value="#{item.id}" />
+				</p:column>
+
+				<p:column headerText="Cliente" filterBy="#{item.descricaoCliente}"
+					sortBy="#{item.descricaoCliente}">
+					<h:outputText value="#{item.descricaoCliente}" />
+				</p:column>
+
+				<p:column headerText="Vendedor" filterBy="#{item.descricaoUsuario}"
+					sortBy="#{item.descricaoUsuario}">
+					<h:outputText value="#{item.descricaoUsuario}" />
+				</p:column>
+
+				<p:column headerText="Produto" filterBy="#{item.descricaoProduto}"
+					sortBy="#{item.descricaoProduto}">
+					<h:outputText value="#{item.descricaoProduto}" />
+				</p:column>
+
+				<p:column headerText="Quantidade" filterBy="#{item.quantidade}"
+					sortBy="#{item.quantidade}">
+					<h:outputText value="#{item.quantidade}" />
+				</p:column>
+
+				<p:column headerText="Valor" filterBy="#{item.valorTotal}"
+					sortBy="#{item.valorTotal}">
+					<h:outputText value="#{item.valorTotal}" />
+				</p:column>
+
+				<p:column headerText="Data" filterBy="#{item.data}"
+					sortBy="#{item.data}">
+					<h:outputText value="#{item.data}" />
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Ir aos produtos"
+					icon="ui-icon-arrowreturnthick-1-w" action="produto" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

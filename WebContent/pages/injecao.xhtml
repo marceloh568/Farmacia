@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<f:event listener="#{injecaoBean.carregarListagem()}"
+			type="preRenderView" />
+
+		<h:form id="frmInjListagem">
+			<p:dataTable id="tblInjListagem" widgetVar="tabelaInjListagem"
+				value="#{injecaoBean.itens}" var="item"
+				emptyMessage="Nenhum registro encontrado." paginator="true"
+				rows="10" filteredValue="#{injecaoBean.itensFiltrados}">
+
+				<f:facet name="header">
+					<h:outputText value="Listagem de Injeções" />
+				</f:facet>
+
+				<p:column headerText="ID" filterBy="#{item.id}" sortBy="#{item.id}">
+					<h:outputText value="#{item.id}" />
+				</p:column>
+
+				<p:column headerText="Nome" filterBy="#{item.descricao}"
+					sortBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+				<p:column headerText="Preço" filterBy="#{item.preco}"
+					sortBy="#{item.preco}">
+					<h:outputText value="#{item.preco}" />
+				</p:column>
+
+				<p:column headerText="Tipo" filterBy="#{item.tipo.descricao}"
+					sortBy="#{item.tipo.descricao}">
+					<h:outputText value="#{item.tipo.descricao}" />
+				</p:column>
+
+				<!-- Captura a linha corrente e joga na variável injeçao do ManegedBean -->
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgInjExcluir').show();"
+						update=":frmInjExcluir:pnlInjExcluir">
+						<f:setPropertyActionListener target="#{injecaoBean.injecao}"
+							value="#{item}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						actionListener="#{injecaoBean.prepararEditar()}"
+						oncomplete="PF('dlgInjEditar').show();"
+						update=":mensagemGlobal :frmInjEditar:pnlInjEditar">
+						<f:setPropertyActionListener target="#{injecaoBean.injecao}"
+							value="#{item}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-cart"
+						actionListener="#{injecaoBean.prepararVender()}"
+						oncomplete="PF('dlgInjVender').show();"
+						update=":mensagemGlobal :frmInjVender:pnlInjVender">
+						<f:setPropertyActionListener target="#{injecaoBean.injecao}"
+							value="#{item}" />
+					</p:commandButton>
+
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Cadastrar"
+						oncomplete="PF('dlgInjNovo').show();"
+						actionListener="#{injecaoBean.prepararNovo()}"
+						update=":frmInjNovo:pnlInjNovo :mensagemGlobal" />
+
+					<p:commandButton value="Ir às Vendas"
+						icon="ui-icon-arrowreturnthick-1-e" action="vendaInjecao" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+		<p:dialog widgetVar="dlgInjNovo" closable="false" draggable="false"
+			resizable="false" header="Nova Injeção" modal="true"
+			appendTo="@(body)">
+			<h:form id="frmInjNovo">
+				<h:panelGrid columns="1" id="pnlInjNovo">
+					<p:outputLabel for="txtDescInjNovo" value="Nome: " />
+					<p:inputText id="txtDescInjNovo"
+						value="#{injecaoBean.injecao.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtPrecoInjNovo" value="Preço(R$): " />
+					<p:inputText id="txtPrecoInjNovo"
+						value="#{injecaoBean.injecao.preco}" size="10" required="true"
+						requiredMessage="O campo PREÇO é obrigatório" />
+
+					<!-- itemValue = O que é gravado | itemLabel = O que é mostrado -->
+
+					<p:outputLabel for="cbTipInjNovo" value="Tipo: " />
+					<p:selectOneMenu id="cbTipInjNovo"
+						value="#{injecaoBean.injecao.tipo.id}" filter="true"
+						required="true" requiredMessage="O campo TIPO é obrigatório">
+						<f:selectItem itemValue="" itemLabel="Selecione um tipo" />
+						<f:selectItems value="#{injecaoBean.comboTipos}" var="item"
+							itemValue="#{item.id}" itemLabel="#{item.descricao}" />
+					</p:selectOneMenu>
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{injecaoBean.novo()}"
+						update=":mensagemGlobal :frmInjListagem:tblInjListagem"
+						oncomplete="verificar(xhr, status, args, 'dlgInjNovo','tabelaInjListagem');" />
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgInjNovo').hide();">
+						<p:resetInput target="frmInjNovo" />
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgInjExcluir" closable="false" draggable="false"
+			resizable="false" header="Exclusão de Injeção" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmInjExcluir">
+				<h:panelGrid id="pnlInjExcluir" columns="2">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{injecaoBean.injecao.id}" />
+
+					<p:outputLabel value="Nome: " />
+					<p:outputLabel value="#{injecaoBean.injecao.descricao}" />
+
+					<p:outputLabel value="Preço(R$): " />
+					<p:outputLabel value="#{injecaoBean.injecao.preco}" />
+
+					<p:outputLabel value="Tipo: " />
+					<p:outputLabel value="#{injecaoBean.injecao.tipo.descricao}" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Excluir"
+						actionListener="#{injecaoBean.excluir()}"
+						update=":mensagemGlobal :frmInjListagem:tblInjListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgInjExcluir','tabelaInjListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgInjExcluir').hide();" />
+
+
+
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgInjEditar" closable="false" draggable="false"
+			resizable="false" header="Edição de Injeção" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmInjEditar">
+				<h:panelGrid columns="1" id="pnlInjEditar">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{injecaoBean.injecao.id}" />
+
+					<p:outputLabel for="txtDescInjEditar" value="Nome: " />
+					<p:inputText id="txtDescInjEditar"
+						value="#{injecaoBean.injecao.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtPrecoInjEditar" value="Preço(R$): " />
+					<p:inputText id="txtPrecoInjEditar"
+						value="#{injecaoBean.injecao.preco}" size="10" required="true"
+						requiredMessage="O campo PREÇO é obrigatório" />
+
+					<!--f:selectItems
+					value = nome do arraylist, da variável que representa o combo
+					var = somente um fabricante
+					itemValue = código, o que será gravado no banco. copiado no value do select oneMenu
+					itemLabel = nome, o que será mostrado para o usuário  -->
+
+					<p:outputLabel for="cbTipInjEditar" value="Tipo: " />
+					<p:selectOneMenu id="cbTipInjEditar"
+						value="#{injecaoBean.injecao.tipo.id}" filter="true"
+						required="true" requiredMessage="O campo TIPO é obrigatório">
+						<f:selectItem itemValue="" itemLabel="Selecione um Tipo" />
+						<f:selectItems value="#{injecaoBean.comboTipos}" var="item"
+							itemValue="#{item.id}" itemLabel="#{item.descricao}" />
+					</p:selectOneMenu>
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Editar"
+						actionListener="#{injecaoBean.editar()}"
+						update=":mensagemGlobal :frmInjListagem:tblInjListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgInjEditar','tabelaInjListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgInjEditar').hide();">
+						<p:resetInput target="frmInjEditar" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+
+		<p:dialog widgetVar="dlgInjVender" closable="false" draggable="false"
+			resizable="false" header="Venda de Injeção" modal="true"
+			appendTo="@(body)">
+
+			<h:form id="frmInjVender">
+				<h:panelGrid columns="1" id="pnlInjVender">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{injecaoBean.injecao.id}" />
+
+					<p:outputLabel value="Nome: " />
+					<p:outputLabel value="#{injecaoBean.injecao.descricao}" />
+
+					<p:outputLabel value="Preço(R$): " />
+					<p:outputLabel value="#{injecaoBean.injecao.preco}" />
+
+					<p:outputLabel for="txtQuantidadeInjVender" value="Quantidade: " />
+					<p:inputText id="txtQuantidadeInjVender"
+						value="#{injecaoBean.quantidadeVenda}" size="10" required="true"
+						requiredMessage="O campo QUANTIDADE é obrigatório" />
+
+					<p:outputLabel for="cbClienteInjVender" value="Cliente: " />
+					<p:selectOneMenu id="cbClienteInjVender"
+						value="#{injecaoBean.clienteVenda}" filter="true" required="true"
+						requiredMessage="O campo CLIENTE é obrigatório">
+						<f:selectItem itemValue="" itemLabel="Selecione um Cliente" />
+						<f:selectItems value="#{injecaoBean.comboClientes}" var="item"
+							itemValue="#{item.descricao}" itemLabel="#{item.descricao}" />
+					</p:selectOneMenu>
+
+					<p:outputLabel for="cbUsuarioInjVender" value="Usuário: " />
+					<p:selectOneMenu id="cbUsuarioInjVender"
+						value="#{injecaoBean.usuarioVenda}" filter="true" required="true"
+						requiredMessage="O campo USUÁRIO é obrigatório">
+						<f:selectItem itemValue="" itemLabel="Selecione um Usuário" />
+						<f:selectItems value="#{injecaoBean.comboUsuarios}" var="item"
+							itemValue="#{item.descricao}" itemLabel="#{item.descricao}" />
+					</p:selectOneMenu>
+
+					<p:outputLabel for="txtDataInjVender" value="Data: " />
+					<p:inputText id="txtDataInjVender" value="#{injecaoBean.dataVenda}"
+						maxlength="10" size="10" required="true"
+						requiredMessage="O campo DATA é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Vender"
+						actionListener="#{injecaoBean.vender()}"
+						update=":mensagemGlobal :frmInjListagem:tblInjListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgInjVender','tabelaInjListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgInjVender').hide();">
+						<p:resetInput target="frmInjVender" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+
+	</ui:define>
+
+</ui:composition>

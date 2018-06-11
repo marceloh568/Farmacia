@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"> 
+
+<h:head>
+	<title>Farmácia</title>
+	
+	<h:outputStylesheet library="css" name="estilos.css"/>
+	<h:outputScript library="js" name="scripts.js"/>
+</h:head> 
+
+<h:body> 
+	
+	<!-- GROWL para as mensagens, parametro life 
+	é o tempo de vida dele em milisegundos-->
+	<p:growl id="mensagemGlobal" life="5000"/>
+
+	<p:layout fullPage="true" >
+		<p:layoutUnit position="north">
+			<ui:insert name="menu"/>
+		</p:layoutUnit>
+		
+		<p:layoutUnit position="center">
+			<ui:insert name="conteudo"/>
+		</p:layoutUnit>
+	</p:layout>
+</h:body> 
+</html>

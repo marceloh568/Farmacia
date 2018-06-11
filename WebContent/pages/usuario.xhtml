@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<f:event listener="#{usuarioBean.carregarListagem()}"
+			type="preRenderView" />
+
+		<h:form id="frmUsuarioListagem">
+			<p:dataTable id="tblUsuarioListagem"
+				widgetVar="tabelaUsuarioListagem" value="#{usuarioBean.itens}"
+				var="item" emptyMessage="Nenhum registro encontrado."
+				paginator="true" rows="10"
+				filteredValue="#{usuarioBean.itensFiltrados}">
+
+				<f:facet name="header">
+					<h:outputText value="Listagem de Usuários" />
+				</f:facet>
+
+				<p:column headerText="ID" filterBy="#{item.id}" sortBy="#{item.id}">
+					<h:outputText value="#{item.id}" />
+				</p:column>
+
+				<p:column headerText="Nome" filterBy="#{item.descricao}"
+					sortBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+
+				<p:column headerText="CPF" filterBy="#{item.cpf}"
+					sortBy="#{item.cpf}">
+					<h:outputText value="#{item.cpf}" />
+				</p:column>
+
+				<p:column headerText="Telefone" filterBy="#{item.telefone}"
+					sortBy="#{item.telefone}">
+					<h:outputText value="#{item.telefone}" />
+				</p:column>
+
+				<p:column headerText="Dat. Nasc" filterBy="#{item.dataNascimento}"
+					sortBy="#{item.dataNascimento}">
+					<h:outputText value="#{item.dataNascimento}" />
+				</p:column>
+
+				<!-- Captura a linha corrente e joga na variável usuário do ManegedBean -->
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgUsuarioExcluir').show();"
+						update=":frmUsuarioExcluir:pnlUsuarioExcluir">
+						<f:setPropertyActionListener target="#{usuarioBean.usuario}"
+							value="#{item}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						oncomplete="PF('dlgUsuarioEditar').show();"
+						update=":mensagemGlobal :frmUsuarioEditar:pnlUsuarioEditar">
+						<f:setPropertyActionListener target="#{usuarioBean.usuario}"
+							value="#{item}" />
+					</p:commandButton>
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Cadastrar"
+						oncomplete="PF('dlgUsuarioNovo').show();"
+						actionListener="#{usuarioBean.prepararNovo()}"
+						update=":frmUsuarioNovo:pnlUsuarioNovo :mensagemGlobal" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+		<p:dialog widgetVar="dlgUsuarioNovo" closable="false"
+			draggable="false" resizable="false" header="Novo Usuário"
+			modal="true" appendTo="@(body)">
+			<h:form id="frmUsuarioNovo">
+				<h:panelGrid columns="1" id="pnlUsuarioNovo">
+					<p:outputLabel for="txtDescUsuarioNovo" value="Nome: " />
+					<p:inputText id="txtDescUsuarioNovo"
+						value="#{usuarioBean.usuario.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtCpfUsuarioNovo" value="CPF: " />
+					<p:inputText id="txtCpfUsuarioNovo"
+						value="#{usuarioBean.usuario.cpf}" size="14" maxlength="14"
+						required="true" requiredMessage="O campo CPF é obrigatório" />
+
+					<p:outputLabel for="txtTelefoneUsuarioNovo" value="Telefone: " />
+					<p:inputText id="txtTelefoneUsuarioNovo"
+						value="#{usuarioBean.usuario.telefone}" size="14" maxlength="14"
+						required="false" />
+
+					<p:outputLabel for="txtDataNascimentoUsuarioNovo"
+						value="Dat. Nasc: " />
+					<p:inputText id="txtDataNascimentoUsuarioNovo"
+						value="#{usuarioBean.usuario.dataNascimento}" size="10"
+						maxlength="10" required="true"
+						requiredMessage="O campo DAT. NASC é obrigatório" />
+
+					<p:outputLabel for="txtSenhaUsuarioNovo" value="Senha: " />
+					<h:inputSecret id="txtSenhaUsuarioNovo"
+						value="#{usuarioBean.usuario.senha}" size="20" maxlength="20"
+						required="true" requiredMessage="O campo SENHA é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{usuarioBean.novoUsuario()}"
+						update=":mensagemGlobal :frmUsuarioListagem:tblUsuarioListagem"
+						oncomplete="verificar(xhr, status, args, 'dlgUsuarioNovo','tabelaUsuarioListagem');" />
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgUsuarioNovo').hide();">
+						<p:resetInput target="frmUsuarioNovo" />
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgUsuarioExcluir" closable="false"
+			draggable="false" resizable="false" header="Exclusão de Usuário"
+			modal="true" appendTo="@(body)">
+
+			<h:form id="frmUsuarioExcluir">
+				<h:panelGrid columns="1" id="pnlUsuarioExcluir">
+					<p:outputLabel value="ID: " />
+					<h:outputText value="#{usuarioBean.usuario.id}" />
+
+					<p:outputLabel value="Nome: " />
+					<h:outputText value="#{usuarioBean.usuario.descricao}" />
+
+					<p:outputLabel value="CPF: " />
+					<h:outputText value="#{usuarioBean.usuario.cpf}" />
+
+					<p:outputLabel value="Telefone: " />
+					<h:outputText value="#{usuarioBean.usuario.telefone}" />
+
+					<p:outputLabel value="Dat. Nasc: " />
+					<h:outputText value="#{usuarioBean.usuario.dataNascimento}" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Excluir"
+						actionListener="#{usuarioBean.excluir()}"
+						update=":mensagemGlobal :frmUsuarioListagem:tblUsuarioListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgUsuarioExcluir','tabelaUsuarioListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgUsuarioExcluir').hide();">
+						<p:resetInput target="frmUsuarioExcluir" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgUsuarioEditar" closable="false"
+			draggable="false" resizable="false" header="Edição de Usuário"
+			modal="true" appendTo="@(body)">
+
+			<h:form id="frmUsuarioEditar">
+				<h:panelGrid columns="1" id="pnlUsuarioEditar">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{usuarioBean.usuario.id}" />
+
+					<p:outputLabel for="txtDescUsuarioEditar" value="Nome: " />
+					<p:inputText id="txtDescUsuarioEditar"
+						value="#{usuarioBean.usuario.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtCpfUsuarioEditar" value="CPF: " />
+					<p:inputText id="txtCpfUsuarioEditar"
+						value="#{usuarioBean.usuario.cpf}" size="14" maxlength="14"
+						required="true" requiredMessage="O campo CPF é obrigatório" />
+
+					<p:outputLabel for="txtTelefoneUsuarioEditar" value="Telefone: " />
+					<p:inputText id="txtTelefoneUsuarioEditar"
+						value="#{usuarioBean.usuario.telefone}" size="14" maxlength="14"
+						required="false" />
+
+					<p:outputLabel for="txtDataNascUsuarioEditar" value="Dat. Nasc: " />
+					<p:inputText id="txtDataNascUsuarioEditar"
+						value="#{usuarioBean.usuario.dataNascimento}" size="10"
+						maxlength="10" required="true"
+						requiredMessage="O campo DAT. NASC é obrigatório" />
+
+					<p:outputLabel for="txtSenhaUsuarioEditar" value="Senha: " />
+					<h:inputSecret id="txtSenhaUsuarioEditar"
+						value="#{usuarioBean.usuario.senha}" size="20" maxlength="20"
+						required="true" requiredMessage="O campo SENHA é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Editar"
+						actionListener="#{usuarioBean.editar()}"
+						update=":mensagemGlobal :frmUsuarioListagem:tblUsuarioListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgUsuarioEditar','tabelaUsuarioListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgUsuarioEditar').hide();">
+						<p:resetInput target="frmUsuarioEditar" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+
+</ui:composition>

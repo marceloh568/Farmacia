@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form>
+		<p:menubar>
+			<p:submenu label="Arquivo" icon="ui-icon-gear">
+				<p:menuitem value="Sair" outcome="/pages/login.xhtml"
+					icon="ui-icon-power" />
+			</p:submenu>
+
+			<p:submenu label="Operações" icon="ui-icon-folder-collapsed">
+				<p:menuitem value="Fabricantes" outcome="/pages/fabricante.xhtml"
+					icon="ui-icon-folder-open" />
+				<p:menuitem value="Categorias" outcome="/pages/categoria.xhtml"
+					icon="ui-icon-folder-open" />
+				<p:menuitem value="Produtos" outcome="/pages/produto.xhtml"
+					icon="ui-icon-folder-open" />
+				<p:menuitem value="Tipos de Injeções" outcome="/pages/tipo.xhtml"
+					icon="ui-icon-folder-open" />
+				<p:menuitem value="Injeções" outcome="/pages/injecao.xhtml"
+					icon="ui-icon-folder-open" />
+				<p:menuitem value="Clientes" outcome="/pages/cliente.xhtml"
+					icon="ui-icon-folder-open" />
+				<p:menuitem value="Usuários" outcome="/pages/usuario.xhtml"
+					icon="ui-icon-folder-open" />
+			</p:submenu>
+
+			<p:submenu label="Gráficos" icon="ui-icon-bookmark">
+				<p:menuitem value="Produtos" icon="ui-icon-image"
+					outcome="/pages/chartsProduto.xhtml" />
+				<p:menuitem value="Injeções" icon="ui-icon-image"
+					outcome="/pages/chartsInjecao.xhtml" />
+			</p:submenu>
+
+			<p:submenu label="Vendas" icon="ui-icon-cart">
+				<p:menuitem value="Produtos" icon="ui-icon-calculator"
+							outcome="/pages/vendaProduto.xhtml"/>
+				<p:menuitem value="Injeções" icon="ui-icon-calculator"
+							outcome="/pages/vendaInjecao.xhtml"/>
+			</p:submenu>
+
+			<p:submenu label="Ajuda" icon="ui-icon-help">
+				<p:menuitem value="Sobre" icon="ui-icon-comment" />
+			</p:submenu>
+		</p:menubar>
+	</h:form>
+
+
+</ui:composition>

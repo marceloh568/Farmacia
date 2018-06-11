@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuLogin.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+
+		<div id="login-dialog">
+			<center>
+				<h1>Área de Login</h1>
+
+				<h:form id="frmLogin">
+					<h:panelGrid columns="2">
+						<p:outputLabel value="CPF: " />
+						<h:inputText value="#{usuarioBean.cpfTeste}" size="14"
+							maxlength="14" required="true" requiredMessage="Digite o CPF"/>
+
+						<p:outputLabel value="Senha: " />
+						<h:inputSecret value="#{usuarioBean.senhaTeste}" size="20"
+							maxlength="20" required="true" requiredMessage="Digite a SENHA"/>
+
+						<center>
+							<h:commandButton value="Login"
+								action="#{usuarioBean.chamaAutenticar()}"/>
+
+						</center>
+					</h:panelGrid>
+				</h:form>
+
+			</center>
+
+		</div>
+
+
+	</ui:define>
+
+</ui:composition>

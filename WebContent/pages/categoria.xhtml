@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<f:event listener="#{categoriaBean.carregarListagem()}"
+			type="preRenderView" />
+
+
+		<h:form id="frmCategoriaListagem">
+			<p:dataTable id="tblCategoriaListagem" widgetVar="tabelaCategoriaListagem"
+				value="#{categoriaBean.itens}" var="item"
+				emptyMessage="Nenhum registro encontrado." paginator="true"
+				rows="10" filteredValue="#{categoriaBean.itensFiltrados}">
+
+				<f:facet name="header">
+					<h:outputText value="Listagem de Categorias" />
+				</f:facet>
+
+				<p:column headerText="ID" filterBy="#{item.id}" sortBy="#{item.id}">
+					<h:outputText value="#{item.id}" />
+				</p:column>
+
+				<p:column headerText="Nome" filterBy="#{item.descricao}"
+					sortBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+				<!-- Captura a linha corrente e joga na variável categoria do ManegedBean -->
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgCategoriaExcluir').show();"
+						update=":frmCategoriaExcluir:pnlCategoriaExcluir">
+						<f:setPropertyActionListener target="#{categoriaBean.categoria}"
+							value="#{item}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						oncomplete="PF('dlgCategoriaEditar').show();"
+						update=":mensagemGlobal :frmCategoriaEditar:pnlCategoriaEditar">
+						<f:setPropertyActionListener target="#{categoriaBean.categoria}"
+							value="#{item}" />
+					</p:commandButton>
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Cadastrar"
+						oncomplete="PF('dlgCategoriaNovo').show();"
+						actionListener="#{categoriaBean.prepararNovo()}"
+						update=":frmCategoriaNovo:pnlCategoriaNovo :mensagemGlobal" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+		<p:dialog widgetVar="dlgCategoriaNovo" closable="false" draggable="false"
+			resizable="false" header="Nova Categoria" modal="true" appendTo="@(body)">
+			<h:form id="frmCategoriaNovo">
+				<h:panelGrid columns="1" id="pnlCategoriaNovo">
+					<p:outputLabel for="txtDescCategoriaNovo" value="Nome: " />
+					<p:inputText id="txtDescCategoriaNovo"
+						value="#{categoriaBean.categoria.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{categoriaBean.novoCategoria()}"
+						update=":mensagemGlobal :frmCategoriaListagem:tblCategoriaListagem"
+						oncomplete="verificar(xhr, status, args, 'dlgCategoriaNovo','tabelaCategoriaListagem');" />
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgCategoriaNovo').hide();">
+						<p:resetInput target="frmCategoriaNovo"/>
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgCategoriaExcluir" closable="false" draggable="false"
+			resizable="false" header="Exclusão de Categoria" modal="true" appendTo="@(body)">
+
+			<h:form id="frmCategoriaExcluir">
+				<h:panelGrid columns="1" id="pnlCategoriaExcluir">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{categoriaBean.categoria.id}" />
+
+					<p:outputLabel for="txtDescCategoriaExcluir" value="Nome: " />
+					<p:outputLabel id="txtDescCategoriaExcluir"
+						value="#{categoriaBean.categoria.descricao}"/>
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Excluir"
+						actionListener="#{categoriaBean.excluir()}"
+						update=":mensagemGlobal :frmCategoriaListagem:tblCategoriaListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgCategoriaExcluir','tabelaCategoriaListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgCategoriaExcluir').hide();">
+						<p:resetInput target="frmCategoriaExcluir"/>
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgCategoriaEditar" closable="false" draggable="false"
+			resizable="false" header="Edição de Categoria" modal="true" appendTo="@(body)">
+
+			<h:form id="frmCategoriaEditar">
+				<h:panelGrid columns="1" id="pnlCategoriaEditar">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{categoriaBean.categoria.id}" />
+
+					<p:outputLabel for="txtDescCategoriaEditar" value="Nome: " />
+					<p:inputText id="txtDescCategoriaEditar"
+						value="#{categoriaBean.categoria.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Editar"
+						actionListener="#{categoriaBean.editar()}"
+						update=":mensagemGlobal :frmCategoriaListagem:tblCategoriaListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgCategoriaEditar','tabelaCategoriaListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgCategoriaEditar').hide();">
+						<p:resetInput target="frmCategoriaEditar"/>
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+
+</ui:composition>

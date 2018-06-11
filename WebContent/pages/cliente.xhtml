@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<f:event listener="#{clienteBean.carregarListagem()}"
+			type="preRenderView" />
+
+		<h:form id="frmClienteListagem">
+			<p:dataTable id="tblClienteListagem"
+				widgetVar="tabelaClienteListagem" value="#{clienteBean.itens}"
+				var="item" emptyMessage="Nenhum registro encontrado."
+				paginator="true" rows="10"
+				filteredValue="#{clienteBean.itensFiltrados}">
+
+				<f:facet name="header">
+					<h:outputText value="Listagem de Clientes" />
+				</f:facet>
+
+				<p:column headerText="ID" filterBy="#{item.id}" sortBy="#{item.id}">
+					<h:outputText value="#{item.id}" />
+				</p:column>
+
+				<p:column headerText="Nome" filterBy="#{item.descricao}"
+					sortBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+
+				<p:column headerText="CPF" filterBy="#{item.cpf}"
+					sortBy="#{item.cpf}">
+					<h:outputText value="#{item.cpf}" />
+				</p:column>
+
+				<p:column headerText="Telefone" filterBy="#{item.telefone}"
+					sortBy="#{item.telefone}">
+					<h:outputText value="#{item.telefone}" />
+				</p:column>
+
+				<p:column headerText="Dat. Nasc" filterBy="#{item.dataNascimento}"
+					sortBy="#{item.dataNascimento}">
+					<h:outputText value="#{item.dataNascimento}" />
+				</p:column>
+
+				<!-- Captura a linha corrente e joga na variável cliente do ManegedBean -->
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgClienteExcluir').show();"
+						update=":frmClienteExcluir:pnlClienteExcluir">
+						<f:setPropertyActionListener target="#{clienteBean.cliente}"
+							value="#{item}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						oncomplete="PF('dlgClienteEditar').show();"
+						update=":mensagemGlobal :frmClienteEditar:pnlClienteEditar">
+						<f:setPropertyActionListener target="#{clienteBean.cliente}"
+							value="#{item}" />
+					</p:commandButton>
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Cadastrar"
+						oncomplete="PF('dlgClienteNovo').show();"
+						actionListener="#{clienteBean.prepararNovo()}"
+						update=":frmClienteNovo:pnlClienteNovo :mensagemGlobal" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+		<p:dialog widgetVar="dlgClienteNovo" closable="false"
+			draggable="false" resizable="false" header="Novo Cliente"
+			modal="true" appendTo="@(body)">
+			<h:form id="frmClienteNovo">
+				<h:panelGrid columns="1" id="pnlClienteNovo">
+					<p:outputLabel for="txtDescClienteNovo" value="Nome: " />
+					<p:inputText id="txtDescClienteNovo"
+						value="#{clienteBean.cliente.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtCpfClienteNovo" value="CPF: " />
+					<p:inputText id="txtCpfClienteNovo"
+						value="#{clienteBean.cliente.cpf}" size="14" maxlength="14"
+						required="true" requiredMessage="O campo CPF é obrigatório" />
+
+					<p:outputLabel for="txtTelefoneClienteNovo" value="Telefone: " />
+					<p:inputText id="txtTelefoneClienteNovo"
+						value="#{clienteBean.cliente.telefone}" size="14" maxlength="14"
+						required="false" />
+
+					<p:outputLabel for="txtDataNascimentoClienteNovo"
+						value="Dat. Nasc: " />
+					<p:inputText id="txtDataNascimentoClienteNovo"
+						value="#{clienteBean.cliente.dataNascimento}" size="10"
+						maxlength="10" required="true"
+						requiredMessage="O campo DAT. NASC é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{clienteBean.novoCliente()}"
+						update=":mensagemGlobal :frmClienteListagem:tblClienteListagem"
+						oncomplete="verificar(xhr, status, args, 'dlgClienteNovo','tabelaClienteListagem');" />
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgClienteNovo').hide();">
+						<p:resetInput target="frmClienteNovo" />
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgClienteExcluir" closable="false"
+			draggable="false" resizable="false" header="Exclusão de Cliente"
+			modal="true" appendTo="@(body)">
+
+			<h:form id="frmClienteExcluir">
+				<h:panelGrid columns="1" id="pnlClienteExcluir">
+					<p:outputLabel value="ID: " />
+					<h:outputText value="#{clienteBean.cliente.id}" />
+
+					<p:outputLabel value="Nome: " />
+					<h:outputText value="#{clienteBean.cliente.descricao}" />
+
+					<p:outputLabel value="CPF: " />
+					<h:outputText value="#{clienteBean.cliente.cpf}" />
+
+					<p:outputLabel value="Telefone: " />
+					<h:outputText value="#{clienteBean.cliente.telefone}" />
+
+					<p:outputLabel value="Dat. Nasc: " />
+					<h:outputText value="#{clienteBean.cliente.dataNascimento}" />
+
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Excluir"
+						actionListener="#{clienteBean.excluir()}"
+						update=":mensagemGlobal :frmClienteListagem:tblClienteListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgClienteExcluir','tabelaClienteListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgClienteExcluir').hide();">
+						<p:resetInput target="frmClienteExcluir" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgClienteEditar" closable="false"
+			draggable="false" resizable="false" header="Edição de Cliente"
+			modal="true" appendTo="@(body)">
+
+			<h:form id="frmClienteEditar">
+				<h:panelGrid columns="1" id="pnlClienteEditar">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{clienteBean.cliente.id}" />
+
+					<p:outputLabel for="txtDescClienteEditar" value="Nome: " />
+					<p:inputText id="txtDescClienteEditar"
+						value="#{clienteBean.cliente.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtCpfClienteEditar" value="CPF: " />
+					<p:inputText id="txtCpfClienteEditar"
+						value="#{clienteBean.cliente.cpf}" size="14" maxlength="14"
+						required="true" requiredMessage="O campo CPF é obrigatório" />
+
+					<p:outputLabel for="txtTelefoneClienteEditar" value="Telefone: " />
+					<p:inputText id="txtTelefoneClienteEditar"
+						value="#{clienteBean.cliente.telefone}" size="14" maxlength="14"
+						required="false" />
+
+					<p:outputLabel for="txtDataNascClienteEditar" value="Dat. Nasc: " />
+					<p:inputText id="txtDataNascClienteEditar"
+						value="#{clienteBean.cliente.dataNascimento}" size="10"
+						maxlength="10" required="true"
+						requiredMessage="O campo DAT. NASC é obrigatório" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Editar"
+						actionListener="#{clienteBean.editar()}"
+						update=":mensagemGlobal :frmClienteListagem:tblClienteListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgClienteEditar','tabelaClienteListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgClienteEditar').hide();">
+						<p:resetInput target="frmClienteEditar" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+
+</ui:composition>

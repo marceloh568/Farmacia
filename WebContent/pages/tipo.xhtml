@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<f:event listener="#{tipoBean.carregarListagem()}"
+			type="preRenderView" />
+
+
+		<h:form id="frmTipoListagem">
+			<p:dataTable id="tblTipoListagem" widgetVar="tabelaTipoListagem"
+				value="#{tipoBean.itens}" var="item"
+				emptyMessage="Nenhum registro encontrado." paginator="true"
+				rows="10" filteredValue="#{tipoBean.itensFiltrados}">
+
+				<f:facet name="header">
+					<h:outputText value="Listagem de Tipos de Injeção" />
+				</f:facet>
+
+				<p:column headerText="ID" filterBy="#{item.id}" sortBy="#{item.id}">
+					<h:outputText value="#{item.id}" />
+				</p:column>
+
+				<p:column headerText="Nome" filterBy="#{item.descricao}"
+					sortBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+				<!-- Captura a linha corrente e joga na variável categoria do ManegedBean -->
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgTipoExcluir').show();"
+						update=":frmTipoExcluir:pnlTipoExcluir">
+						<f:setPropertyActionListener target="#{tipoBean.tipo}"
+							value="#{item}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						oncomplete="PF('dlgTipoEditar').show();"
+						update=":mensagemGlobal :frmTipoEditar:pnlTipoEditar">
+						<f:setPropertyActionListener target="#{tipoBean.tipo}"
+							value="#{item}" />
+					</p:commandButton>
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Cadastrar"
+						oncomplete="PF('dlgTipoNovo').show();"
+						actionListener="#{tipoBean.prepararNovo()}"
+						update=":frmTipoNovo:pnlTipoNovo :mensagemGlobal" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+		<p:dialog widgetVar="dlgTipoNovo" closable="false" draggable="false"
+			resizable="false" header="Novo Tipo" modal="true" appendTo="@(body)">
+			<h:form id="frmTipoNovo">
+				<h:panelGrid columns="1" id="pnlTipoNovo">
+					<p:outputLabel for="txtDescTipoNovo" value="Nome: " />
+					<p:inputText id="txtDescTipoNovo"
+						value="#{tipoBean.tipo.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{tipoBean.novoTipo()}"
+						update=":mensagemGlobal :frmTipoListagem:tblTipoListagem"
+						oncomplete="verificar(xhr, status, args, 'dlgTipoNovo','tabelaTipoListagem');" />
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgTipoNovo').hide();">
+						<p:resetInput target="frmTipoNovo"/>
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgTipoExcluir" closable="false" draggable="false"
+			resizable="false" header="Exclusão de Tipo" modal="true" appendTo="@(body)">
+
+			<h:form id="frmTipoExcluir">
+				<h:panelGrid columns="1" id="pnlTipoExcluir">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{tipoBean.tipo.id}" />
+
+					<p:outputLabel for="txtDescTipoExcluir" value="Nome: " />
+					<p:outputLabel id="txtDescTipoExcluir"
+						value="#{tipoBean.tipo.descricao}"/>
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Excluir"
+						actionListener="#{tipoBean.excluir()}"
+						update=":mensagemGlobal :frmTipoListagem:tblTipoListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgTipoExcluir','tabelaTipoListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgTipoExcluir').hide();">
+						<p:resetInput target="frmTipoExcluir"/>
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgTipoEditar" closable="false" draggable="false"
+			resizable="false" header="Edição de Tipo" modal="true" appendTo="@(body)">
+
+			<h:form id="frmTipoEditar">
+				<h:panelGrid columns="1" id="pnlTipoEditar">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{tipoBean.tipo.id}" />
+
+					<p:outputLabel for="txtDescTipoEditar" value="Nome: " />
+					<p:inputText id="txtDescTipoEditar"
+						value="#{tipoBean.tipo.descricao}" maxlength="30" size="30"
+						required="true" requiredMessage="O campo NOME é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Editar"
+						actionListener="#{tipoBean.editar()}"
+						update=":mensagemGlobal :frmTipoListagem:tblTipoListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgTipoEditar','tabelaTipoListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgTipoEditar').hide();">
+						<p:resetInput target="frmTipoEditar"/>
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/templates/modeloSistema.xhtml">
+
+	<ui:define name="menu">
+		<ui:include src="/includes/menuPrincipal.xhtml" />
+	</ui:define>
+
+	<ui:define name="conteudo">
+		<f:event listener="#{fabricanteBean.carregarListagem()}"
+			type="preRenderView" />
+
+
+		<h:form id="frmFabricanteListagem">
+			<p:dataTable id="tblFabricanteListagem"
+				widgetVar="tabelaFabricanteListagem" value="#{fabricanteBean.itens}"
+				var="item" emptyMessage="Nenhum registro encontrado."
+				paginator="true" rows="10"
+				filteredValue="#{fabricanteBean.itensFiltrados}">
+
+				<f:facet name="header">
+					<h:outputText value="Listagem de Fabricantes" />
+				</f:facet>
+
+				<p:column headerText="ID" filterBy="#{item.id}" sortBy="#{item.id}">
+					<h:outputText value="#{item.id}" />
+				</p:column>
+
+				<p:column headerText="Nome" filterBy="#{item.descricao}"
+					sortBy="#{item.descricao}">
+					<h:outputText value="#{item.descricao}" />
+				</p:column>
+
+				<p:column headerText="CNPJ" filterBy="#{item.cnpj}"
+					sortBy="#{item.cnpj}">
+					<h:outputText value="#{item.cnpj}" />
+				</p:column>
+
+				<!-- Captura a linha corrente e joga na variável fabricante do ManegedBean -->
+				<p:column headerText="Opções">
+					<p:commandButton icon="ui-icon-trash"
+						oncomplete="PF('dlgFabricanteExcluir').show();"
+						update=":frmFabricanteExcluir:pnlFabricanteExcluir">
+						<f:setPropertyActionListener target="#{fabricanteBean.fabricante}"
+							value="#{item}" />
+					</p:commandButton>
+
+					<p:commandButton icon="ui-icon-pencil"
+						oncomplete="PF('dlgFabricanteEditar').show();"
+						update=":mensagemGlobal :frmFabricanteEditar:pnlFabricanteEditar">
+						<f:setPropertyActionListener target="#{fabricanteBean.fabricante}"
+							value="#{item}" />
+					</p:commandButton>
+				</p:column>
+
+				<f:facet name="footer">
+					<p:commandButton value="Cadastrar"
+						oncomplete="PF('dlgFabricanteNovo').show();"
+						actionListener="#{fabricanteBean.prepararNovo()}"
+						update=":frmFabricanteNovo:pnlFabricanteNovo :mensagemGlobal" />
+
+				</f:facet>
+			</p:dataTable>
+		</h:form>
+
+		<p:dialog widgetVar="dlgFabricanteNovo" closable="false"
+			draggable="false" resizable="false" header="Novo Fabricante"
+			modal="true" appendTo="@(body)">
+			<h:form id="frmFabricanteNovo">
+				<h:panelGrid columns="1" id="pnlFabricanteNovo">
+					<p:outputLabel for="txtDescFabricanteNovo" value="Nome: " />
+					<p:inputText id="txtDescFabricanteNovo"
+						value="#{fabricanteBean.fabricante.descricao}" maxlength="30"
+						size="30" required="true"
+						requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtCnpjFabricanteNovo" value="CNPJ: " />
+					<p:inputText id="txtCnpjFabricanteNovo"
+						value="#{fabricanteBean.fabricante.cnpj}" maxlength="18"
+						size="18" required="true"
+						requiredMessage="O campo CNPJ é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Salvar"
+						actionListener="#{fabricanteBean.novoFabricante()}"
+						update=":mensagemGlobal :frmFabricanteListagem:tblFabricanteListagem"
+						oncomplete="verificar(xhr, status, args, 'dlgFabricanteNovo','tabelaFabricanteListagem');" />
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgFabricanteNovo').hide();">
+						<p:resetInput target="frmFabricanteNovo" />
+					</p:commandButton>
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgFabricanteExcluir" closable="false"
+			draggable="false" resizable="false" header="Exclusão de Fabricante"
+			modal="true" appendTo="@(body)">
+
+			<h:form id="frmFabricanteExcluir">
+				<h:panelGrid columns="1" id="pnlFabricanteExcluir">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{fabricanteBean.fabricante.id}" />
+
+					<p:outputLabel for="txtDescFabricanteExcluir" value="Nome: " />
+					<p:outputLabel id="txtDescFabricanteExcluir"
+						value="#{fabricanteBean.fabricante.descricao}" />
+
+					<p:outputLabel for="txtCnpjFabricanteExcluir" value="CNPJ: " />
+					<p:outputLabel id="txtCnpjFabricanteExcluir"
+						value="#{fabricanteBean.fabricante.cnpj}" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Excluir"
+						actionListener="#{fabricanteBean.excluir()}"
+						update=":mensagemGlobal :frmFabricanteListagem:tblFabricanteListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgFabricanteExcluir','tabelaFabricanteListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgFabricanteExcluir').hide();">
+						<p:resetInput target="frmFabricanteExcluir" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+		<p:dialog widgetVar="dlgFabricanteEditar" closable="false"
+			draggable="false" resizable="false" header="Edição de Fabricante"
+			modal="true" appendTo="@(body)">
+
+			<h:form id="frmFabricanteEditar">
+				<h:panelGrid columns="1" id="pnlFabricanteEditar">
+					<p:outputLabel value="ID: " />
+					<p:outputLabel value="#{fabricanteBean.fabricante.id}" />
+
+					<p:outputLabel for="txtDescFabricanteEditar" value="Nome: " />
+					<p:inputText id="txtDescFabricanteEditar"
+						value="#{fabricanteBean.fabricante.descricao}" maxlength="30"
+						size="30" required="true"
+						requiredMessage="O campo NOME é obrigatório" />
+
+					<p:outputLabel for="txtCnpjFabricanteEditar" value="CNPJ: " />
+					<p:inputText id="txtCnpjFabricanteEditar"
+						value="#{fabricanteBean.fabricante.cnpj}" maxlength="18"
+						size="18" required="true"
+						requiredMessage="O campo CNPJ é obrigatório" />
+
+				</h:panelGrid>
+
+				<h:panelGrid columns="2">
+					<p:commandButton value="Editar"
+						actionListener="#{fabricanteBean.editar()}"
+						update=":mensagemGlobal :frmFabricanteListagem:tblFabricanteListagem"
+						oncomplete="verificar(xhr,status, args, 'dlgFabricanteEditar','tabelaFabricanteListagem');" />
+
+					<p:commandButton value="Cancelar" process="@this"
+						oncomplete="PF('dlgFabricanteEditar').hide();">
+						<p:resetInput target="frmFabricanteEditar" />
+					</p:commandButton>
+				</h:panelGrid>
+
+			</h:form>
+		</p:dialog>
+
+	</ui:define>
+
+</ui:composition>
